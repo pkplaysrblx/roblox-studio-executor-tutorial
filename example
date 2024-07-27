@@ -1,0 +1,103 @@
+-- Create the GUI elements
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local ScriptInput = Instance.new("TextBox")
+local ExecuteButton = Instance.new("TextButton")
+local ClearButton = Instance.new("TextButton")
+local CloseButton = Instance.new("TextButton")
+
+-- Parent the GUI elements to the ScreenGui
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Frame.Parent = ScreenGui
+ScriptInput.Parent = Frame
+ExecuteButton.Parent = Frame
+ClearButton.Parent = Frame
+CloseButton.Parent = Frame
+
+-- Configure Frame (to contain other elements and make draggable)
+Frame.Size = UDim2.new(0.9, 0, 0.6, 0)
+Frame.Position = UDim2.new(0.05, 0, 0.2, 0)
+Frame.BackgroundTransparency = 1
+
+-- Configure ScriptInput (TextBox)
+ScriptInput.Size = UDim2.new(1, 0, 0.6, 0)
+ScriptInput.Position = UDim2.new(0, 0, 0, 0)
+ScriptInput.PlaceholderText = "Enter your script here"
+ScriptInput.TextWrapped = true
+ScriptInput.ClearTextOnFocus = false
+ScriptInput.MultiLine = true
+
+-- Configure ExecuteButton (TextButton)
+ExecuteButton.Size = UDim2.new(0.35, 0, 0.1, 0)
+ExecuteButton.Position = UDim2.new(0.1, 0, 0.65, 0)
+ExecuteButton.Text = "Execute"
+
+-- Configure ClearButton (TextButton)
+ClearButton.Size = UDim2.new(0.35, 0, 0.1, 0)
+ClearButton.Position = UDim2.new(0.55, 0, 0.65, 0)
+ClearButton.Text = "Clear"
+
+-- Configure CloseButton (TextButton)
+CloseButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+CloseButton.Position = UDim2.new(0.8, 0, 0, 0)  -- Adjusted position to be closer to the top-right corner of the Frame
+CloseButton.Text = "X"
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Function to execute script
+ExecuteButton.MouseButton1Click:Connect(function()
+    local scriptCode = ScriptInput.Text
+    local success, errorMessage = pcall(function()
+        loadstring(scriptCode)()
+    end)
+    if not success then
+        warn("Error executing script: " .. errorMessage)
+    end
+end)
+
+-- Function to clear the input
+ClearButton.MouseButton1Click:Connect(function()
+    ScriptInput.Text = ""
+end)
+
+-- Function to close the GUI
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy() -- This will remove the entire ScreenGui from the player's PlayerGui
+end)
+
+-- Make the GUI draggable
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
