@@ -8,6 +8,28 @@ Here are the steps.
  5. ```
     yourbuttonname.MouseButton1Up:Connect(function()
 	loadstring(Script.code)
-end)```
+	end)
+    ```
 
-6.
+ 6. Now go into your clear button and paste this code in
+   ```
+   yourbuttonname.MouseButton1Up:Connect(function()
+	Script.code = ''
+	end)
+   ```
+ 7. Lastly, paste this code into your textbox
+    ```
+    ExecuteButton.MouseButton1Click:Connect(function()
+    local scriptCode = ScriptInput.Text
+    local success, errorMessage = pcall(function()
+        loadstring(scriptCode)()
+    end)
+    if not success then
+        warn("Error executing script: " .. errorMessage)
+    end
+    end)
+    ```
+# Finished
+You have now finished your script. You may execute it with your executor now!
+If you are having issues, use the provided script and edit it.
+    
